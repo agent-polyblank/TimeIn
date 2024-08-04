@@ -28,6 +28,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class Country(val name: String, val zone: TimeZone)
 
+/**
+ * Zero-pad a number to two digits by prepending a zero eg 1 becomes 01.
+ */
+fun Int.zeroPadStart() = this.toString().padStart(2, '0')
 
 val countries = listOf(
     Country("Japan 🇯🇵", TimeZone.of("Asia/Tokyo")),
@@ -101,8 +105,8 @@ fun App() {
 fun currentTimeAt(location: String, zone: TimeZone): String {
     val time = Clock.System.now()
     val localTime = time.toLocalDateTime(zone).time
-    //I don't know if this is the best way to format the time, but it works.
-    return "The time in $location is ${localTime.hour}:${
-        localTime.minute.toString().padStart(2, '0')
-    }:${localTime.second.toString().padStart(2, '0')}"
+    return "The time in $location is ${localTime.hour.zeroPadStart()}:${
+        localTime.minute.zeroPadStart()
+    }:${localTime.second.zeroPadStart()}"
 }
+
