@@ -9,6 +9,7 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,30 +20,21 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-
 data class Country(val name: String, val zone: TimeZone)
 
-fun currentTimeAt(location: String, zone: TimeZone): String {
-    fun LocalTime.formatted() = "$hour:$minute:$second"
-
-    val time = Clock.System.now()
-    val localTime = time.toLocalDateTime(zone).time
-
-    return "The time in $location is ${localTime.formatted()}"
-}
 
 val countries = listOf(
-    Country("🇯🇵 Japan", TimeZone.of("Asia/Tokyo")),
-    Country("🇫🇷 France", TimeZone.of("Europe/Paris")),
-    Country("🇲🇽 Mexico", TimeZone.of("America/Mexico_City")),
-    Country("🇮🇩 Indonesia", TimeZone.of("Asia/Jakarta")),
-    Country("🇪🇬 Egypt", TimeZone.of("Africa/Cairo")),
+    Country("Japan 🇯🇵", TimeZone.of("Asia/Tokyo")),
+    Country("France 🇫🇷", TimeZone.of("Europe/Paris")),
+    Country("Mexico 🇲🇽", TimeZone.of("America/Mexico_City")),
+    Country("Indonesia 🇮🇩", TimeZone.of("Asia/Jakarta")),
+    Country("Egypt 🇪🇬", TimeZone.of("Africa/Cairo")),
 )
 
 @Composable
@@ -51,6 +43,17 @@ fun App() {
     MaterialTheme {
         var showCountries by remember { mutableStateOf(false) }
         var timeAtLocation by remember { mutableStateOf("No location selected") }
+        var selectedCountry by remember { mutableStateOf<Country?>(null) }
+
+        LaunchedEffect(selectedCountry) {
+            selectedCountry?.let { country ->
+                while (true) {
+                    timeAtLocation = currentTimeAt(country.name, country.zone)
+                    delay(1000L) // Update every second
+                }
+            }
+        }
+
         Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
             Column(
                 modifier = Modifier.padding(20.dp),
@@ -67,14 +70,14 @@ fun App() {
                         expanded = showCountries,
                         onDismissRequest = { showCountries = false }
                     ) {
-                        countries.forEach { (name, zone) ->
+                        countries.forEach { country ->
                             DropdownMenuItem(
                                 onClick = {
-                                    timeAtLocation = currentTimeAt(name, zone)
+                                    selectedCountry = country
                                     showCountries = false
                                 }
                             ) {
-                                Text(name)
+                                Text(country.name)
                             }
                         }
                     }
@@ -87,5 +90,19 @@ fun App() {
             }
         }
     }
+}
 
+/**
+ * Get the current time at a given timezone.
+ * @param location The name of the location as a formatted string.
+ * @param zone The timezone of the location.
+ * @return Formatted string with the current time at the location.
+ */
+fun currentTimeAt(location: String, zone: TimeZone): String {
+    val time = Clock.System.now()
+    val localTime = time.toLocalDateTime(zone).time
+    //I don't know if this is the best way to format the time, but it works.
+    return "The time in $location is ${localTime.hour}:${
+        localTime.minute.toString().padStart(2, '0')
+    }:${localTime.second.toString().padStart(2, '0')}"
 }
