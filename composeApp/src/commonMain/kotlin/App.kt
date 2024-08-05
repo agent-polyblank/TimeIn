@@ -28,10 +28,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class Country(val name: String, val zone: TimeZone)
 
-/**
- * Zero-pad a number to two digits by prepending a zero eg 1 becomes 01.
- */
-fun Int.zeroPadStart() = this.toString().padStart(2, '0')
 
 val countries = listOf(
     Country("Japan 🇯🇵", TimeZone.of("Asia/Tokyo")),
@@ -40,6 +36,25 @@ val countries = listOf(
     Country("Indonesia 🇮🇩", TimeZone.of("Asia/Jakarta")),
     Country("Egypt 🇪🇬", TimeZone.of("Africa/Cairo")),
 )
+
+/**
+ * Zero-pad a number to two digits by prepending a zero eg 1 becomes 01.
+ */
+fun Int.zeroPadStart() = this.toString().padStart(2, '0')
+
+/**
+ * Get the current time at a given timezone.
+ * @param location The name of the location as a formatted string.
+ * @param zone The timezone of the location.
+ * @return Formatted string with the current time at the location.
+ */
+fun currentTimeAt(location: String, zone: TimeZone): String {
+    val time = Clock.System.now()
+    val localTime = time.toLocalDateTime(zone).time
+    return "The time in $location is ${localTime.hour.zeroPadStart()}:${
+        localTime.minute.zeroPadStart()
+    }:${localTime.second.zeroPadStart()}"
+}
 
 @Composable
 @Preview
@@ -95,18 +110,3 @@ fun App() {
         }
     }
 }
-
-/**
- * Get the current time at a given timezone.
- * @param location The name of the location as a formatted string.
- * @param zone The timezone of the location.
- * @return Formatted string with the current time at the location.
- */
-fun currentTimeAt(location: String, zone: TimeZone): String {
-    val time = Clock.System.now()
-    val localTime = time.toLocalDateTime(zone).time
-    return "The time in $location is ${localTime.hour.zeroPadStart()}:${
-        localTime.minute.zeroPadStart()
-    }:${localTime.second.zeroPadStart()}"
-}
-
